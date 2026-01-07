@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.fmoraes</groupId>
+    <artifactId>jtags-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>jtags Parent</name>
+    <description>Server-side rendered UI components for Java template engines</description>
+    <url>https://github.com/felipe-alves-moraes/jtags</url>
+    <inceptionYear>2026</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>fmoraes</id>
+            <name>Felipe Alves de Moraes</name>
+            <email>felipe@blueprint-tech.simplelogin.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/felipe-alves-moraes/jtags.git</connection>
+        <developerConnection>scm:git:ssh://github.com:felipe-alves-moraes/jtags.git</developerConnection>
+        <url>https://github.com/felipe-alves-moraes/jtags</url>
+    </scm>
+
+    <modules>
+        <module>jtags</module>
+        <module>demo</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <quarkus.version>3.17.2</quarkus.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jreleaser</groupId>
+                <artifactId>jreleaser-maven-plugin</artifactId>
+                <version>1.22.0</version>
+                <inherited>false</inherited>
+            </plugin>
+        </plugins>
+    </build>
+</project>

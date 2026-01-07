@@ -1,0 +1,80 @@
+{#if state.page.totalPages > 1}
+<nav class="jtags-pagination" aria-label="Pagination">
+    <ul class="jtags-pagination__list">
+        <li class="jtags-pagination__item">
+            {#if state.page.hasPrevious}
+            <a href="#"
+               class="jtags-pagination__link jtags-pagination__link--prev"
+               hx-get="{baseUrl}?page={state.page.currentPage - 1}&sort={state.sortBy}&asc={state.ascending}"
+               hx-target="#table-container"
+               hx-include="#table-actions"
+               hx-swap="outerHTML"
+               hx-push-url="true"
+            >
+                <svg class="jtags-icon">
+                    <use href="{iconBasePath}#jtags-icon-chevron-left"></use>
+                </svg>
+                {#if showLabels}
+                    <span>Previous</span>
+                {/if}
+            </a>
+            {#else}
+            <span class="jtags-pagination__link jtags-pagination__link--prev jtags-pagination__link--disabled"
+                  aria-disabled="true">
+                <svg class="jtags-icon"><use href="{iconBasePath}#jtags-icon-chevron-left"></use></svg>
+                {#if showLabels}
+                    <span>Previous</span>
+                {/if}
+            </span>
+            {/if}
+        </li>
+
+        {#for pageNum in state.page.totalPages}
+        <li class="jtags-pagination__item">
+            {#if pageNum == state.page.currentPage}
+            <strong class="jtags-pagination__link jtags-pagination__link--active" aria-current="page">{pageNum}</strong>
+            {#else}
+            <a href="#"
+               class="jtags-pagination__link"
+               hx-get="{baseUrl}?page={pageNum}&sort={state.sortBy}&asc={state.ascending}"
+               hx-include="#table-actions"
+               hx-target="#table-container"
+               hx-swap="outerHTML"
+               hx-push-url="true"
+            >
+                {pageNum}
+            </a>
+            {/if}
+        </li>
+        {/for}
+
+        <li class="jtags-pagination__item">
+            {#if state.page.hasNext}
+            <a href="#"
+               class="jtags-pagination__link jtags-pagination__link--next"
+               hx-get="{baseUrl}?page={state.page.currentPage + 1}&sort={state.sortBy}&asc={state.ascending}"
+               hx-target="#table-container"
+               hx-include="#table-actions"
+               hx-swap="outerHTML"
+               hx-push-url="true"
+            >
+                {#if showLabels}
+                    <span>Next</span>
+                {/if}
+                <svg class="jtags-icon">
+                    <use href="{iconBasePath}#jtags-icon-chevron-right"></use>
+                </svg>
+            </a>
+            {#else}
+            <span class="jtags-pagination__link jtags-pagination__link--next jtags-pagination__link--disabled"
+                  aria-disabled="true">
+                {#if showLabels}
+                    <span>Next</span>
+                {/if}
+                <svg class="jtags-icon"><use href="{iconBasePath}#jtags-icon-chevron-right"></use></svg>
+            </span>
+            {/if}
+        </li>
+    </ul>
+</nav>
+{/if}

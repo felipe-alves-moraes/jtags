@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title ?: 'User Manager'}</title>
+
+    <!-- Minimal CSS - you can swap for Tailwind/Pico later -->
+    {!<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">!}
+    <link rel="stylesheet" href="/css/jtags/jtags-core.css">
+    <link rel="stylesheet" href="/css/jtags/jtags-theme.css">
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+    <script src="/js/jtags/table.js" defer></script>
+</head>
+<body>
+<main class="container">
+    {#insert}Content goes here{/insert}
+</main>
+</body>
+</html>
