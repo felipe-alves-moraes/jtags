@@ -29,7 +29,7 @@ git commit -m "chore: release v$VERSION"
 git push origin main
 
 # Run JReleaser
-mvn jreleaser:full-release
+mvn -N jreleaser:full-release
 
 # Set next snapshot version
 mvn versions:set -DnewVersion=$NEXT_VERSION -DgenerateBackupPoms=false
