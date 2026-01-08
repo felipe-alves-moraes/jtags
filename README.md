@@ -21,6 +21,10 @@ Modern web development often pushes complexity to the frontend with heavy JavaSc
 | Tabs | 🔜 Planned |
 | Cards | 🔜 Planned |
 
+### Data Table
+
+![data-table-example](docs/table-example.png)
+
 ## Data Table Features
 
 - Server-side sorting, pagination, and search
@@ -989,6 +993,21 @@ Fragment template (`templates/fragments/user-table.html`):
 | Custom modal support | 🔜 Planned |
 
 ---
+
+## Backlog
+
+| Item | Priority |
+|------|----------|
+| Create proper Quarkus extension (auto-register TemplateExtensions) | High |
+| Split documentation (README + /docs folder) | Medium |
+| Row actions (edit, view, delete per row) | Medium |
+| Inline editing | Medium |
+| Multiple tables per page | Low |
+| Custom modal support (bring your own) | Low |
+| Thymeleaf support | Low |
+| Configurable URL push (hx-push-url) | Low |
+| Evaluate RSCSS as alternative to BEM | Low |
+| Evaluate Web Components for UI widgets (modal, tooltips) - HTMX 2.0 compatible | Low |
 
 ## Contributing
 
