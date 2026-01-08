@@ -4,7 +4,7 @@ project:
   website: https://github.com/felipe-alves-moraes/jtags
   license: MIT
   authors:
-    - Your Name
+    - Felipe Moraes
   inceptionYear: "2026"
 
 release:
@@ -16,22 +16,3 @@ release:
       formatted: ALWAYS
       preset: conventional-commits
       links: true
-
-signing:
-  active: ALWAYS
-  armored: true
-
-deploy:
-  maven:
-    mavenCentral:
-      sonatype:
-        active: ALWAYS
-        url: https://central.sonatype.com/api/v1/publisher
-        stagingRepositories:
-          - target/staging-deploy
-
-distributions:
-  jtags:
-    type: JAVA_BINARY
-    artifacts:
-      - path: jtags/target/jtags-{{projectVersion}}.jar
