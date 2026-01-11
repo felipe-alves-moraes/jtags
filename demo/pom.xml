@@ -28,20 +28,25 @@
     </dependencyManagement>
 
     <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
+<!--        <repository>-->
+<!--            <id>jitpack.io</id>-->
+<!--            <url>https://jitpack.io</url>-->
+<!--        </repository>-->
     </repositories>
 
     <dependencies>
         <!-- jtags library -->
-        <dependency>
-            <groupId>com.github.felipe-alves-moraes</groupId>
-            <artifactId>jtags</artifactId>
-            <version>v0.1.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.felipe-alves-moraes</groupId>-->
+<!--            <artifactId>jtags</artifactId>-->
+<!--            <version>v0.1.0</version>-->
+<!--        </dependency>-->
 
+        <dependency>
+            <groupId>com.fmoraes</groupId>
+            <artifactId>jtags</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- Quarkus -->
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -54,6 +59,32 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-qute</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkiverse.web-bundler</groupId>
+            <artifactId>quarkus-web-bundler</artifactId>
+            <version>2.0.4</version>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>org.mvnpm</groupId>-->
+<!--            <artifactId>pdfjs-dist</artifactId>-->
+<!--            <version>4.10.38</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+
+        <dependency>
+            <groupId>org.mvnpm</groupId>
+            <artifactId>htmx.org</artifactId>
+            <version>2.0.8</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.3</version>
         </dependency>
     </dependencies>
 

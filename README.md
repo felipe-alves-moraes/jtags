@@ -1008,6 +1008,7 @@ Fragment template (`templates/fragments/user-table.html`):
 | Configurable URL push (hx-push-url) | Low |
 | Evaluate RSCSS as alternative to BEM | Low |
 | Evaluate Web Components for UI widgets (modal, tooltips) - HTMX 2.0 compatible | Low |
+| Bundle PDF.js with jtags (zero-config for users) | Medium |
 
 ## Contributing
 

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Selector Demo</title>
+        {#bundle /}
+    <link rel="stylesheet" href="/css/jtags/jtags-core.css">
+    <link rel="stylesheet" href="/css/jtags/jtags-pdf-selector.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.9.155/pdf.min.mjs" type="module"></script>
+    <script type="module">
+        import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.9.155/pdf.min.mjs';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.9.155/pdf.worker.min.mjs';
+        window.pdfjsLib = pdfjsLib;
+    </script>
+</head>
+<body>
+<div style="max-width: 900px; margin: 2rem auto; padding: 0 1rem;">
+    <h1>PDF Selector Demo</h1>
+
+    <form hx-post="/pdf/upload"
+          hx-target="#pdf-viewer-container"
+          hx-encoding="multipart/form-data"
+          hx-swap="innerHTML">
+        <input type="file" name="file" accept="application/pdf" required>
+        <button type="submit">Upload PDF</button>
+    </form>
+
+    <!-- Component loads here after upload -->
+    <div id="pdf-viewer-container" style="margin-top: 1rem;"></div>
+</div>
+
+<script src="/js/jtags/pdf-selector.js"></script>
+</body>
+</html>

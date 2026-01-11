@@ -1,0 +1,89 @@
+{@com.fmoraes.jtags.pdf.PdfSelectorConfig config}
+
+<div class="jtags-pdf-selector"
+     id="jtags-pdf-selector"
+     data-pdf-url="{config.pdfUrl}"
+     data-pdf-id="{config.pdfId}"
+     data-base-url="{config.baseUrl}">
+
+    <!-- Toolbar -->
+    <div class="jtags-pdf-selector__toolbar">
+        <div class="jtags-pdf-selector__nav">
+            <button type="button" class="jtags-pdf-selector__btn" data-action="prev-page" disabled>
+                <svg class="jtags-icon">
+                    <use href="{config.iconBasePath}#jtags-icon-chevron-left"></use>
+                </svg>
+            </button>
+            <span class="jtags-pdf-selector__page-info">
+                <span data-page-current>1</span> / <span data-page-total>?</span>
+            </span>
+            <button type="button" class="jtags-pdf-selector__btn" data-action="next-page" disabled>
+                <svg class="jtags-icon">
+                    <use href="{config.iconBasePath}#jtags-icon-chevron-right"></use>
+                </svg>
+            </button>
+        </div>
+
+        <div class="jtags-pdf-selector__zoom">
+            <button type="button" class="jtags-pdf-selector__btn" data-action="zoom-out">
+                <svg class="jtags-icon">
+                    <use href="{config.iconBasePath}#jtags-icon-zoom-out"></use>
+                </svg>
+            </button>
+            <span class="jtags-pdf-selector__zoom-level" data-zoom-level>100%</span>
+            <button type="button" class="jtags-pdf-selector__btn" data-action="zoom-in">
+                <svg class="jtags-icon">
+                    <use href="{config.iconBasePath}#jtags-icon-zoom-in"></use>
+                </svg>
+            </button>
+        </div>
+
+        <div class="jtags-pdf-selector__selection-actions">
+            <span class="jtags-pdf-selector__selection-info" data-selection-info hidden></span>
+            <button type="button"
+                    class="jtags-pdf-selector__btn"
+                    data-action="clear-selection"
+                    title="Clear selection (Esc)"
+                    hidden>
+                <svg class="jtags-icon"><use href="{config.iconBasePath}#jtags-icon-trash"></use></svg>
+            </button>
+
+            <button type="button"
+                    class="jtags-pdf-selector__btn jtags-pdf-selector__btn--primary"
+                    data-action="extract"
+                    title="Extract data from selection">
+                <svg class="jtags-icon"><use href="{config.iconBasePath}#jtags-icon-export"></use></svg>
+                <span>Extract</span>
+            </button>
+        </div>
+    </div>
+
+
+    <div class="jtags-pdf-selector__content">
+        <div class="jtags-pdf-selector__sidebar" data-sidebar>
+            <div class="jtags-pdf-selector__thumbnails" data-thumbnails>
+                <!-- Thumbnails rendered by JS -->
+            </div>
+        </div>
+
+        <div class="jtags-pdf-selector__viewer">
+            <div class="jtags-pdf-selector__canvas-container">
+                <div class="jtags-pdf-selector__canvas-wrapper" data-canvas-wrapper>
+                    <canvas class="jtags-pdf-selector__canvas" data-pdf-canvas></canvas>
+                    <canvas class="jtags-pdf-selector__overlay" data-selection-overlay></canvas>
+                </div>
+            </div>
+
+            <div class="jtags-pdf-selector__loading" data-loading>
+                <span>Loading PDF...</span>
+            </div>
+
+            <div class="jtags-pdf-selector__error" data-error hidden>
+                <span data-error-message></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="extraction-preview" class="jtags-pdf-selector__preview" hidden>
+    </div>
+</div>
