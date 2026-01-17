@@ -1031,6 +1031,19 @@ cd demo
 mvn quarkus:dev
 ```
 
+### Running Tests
+```bash
+# Java tests (Maven)
+mvn test
+
+# JavaScript tests (Web Test Runner + Playwright)
+cd jtags
+npm install     # first time only
+npm test        # run tests
+npm run test:watch     # watch mode
+npm run test:coverage  # with coverage report
+```
+
 ### Code Style
 
 - Java: Follow standard Java conventions

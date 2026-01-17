@@ -1,0 +1,18 @@
+{
+  "name": "jtags",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Server-side rendered UI components with web component enhancements",
+  "scripts": {
+    "test": "web-test-runner",
+    "test:watch": "web-test-runner --watch",
+    "test:coverage": "web-test-runner --coverage"
+  },
+  "devDependencies": {
+    "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@open-wc/testing": "^4.0.0",
+    "@web/test-runner": "^0.19.0",
+    "@web/test-runner-playwright": "^0.11.0"
+  }
+}

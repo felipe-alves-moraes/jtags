@@ -1,70 +1,135 @@
+/**
+ * jtags Table - Main entry point (Facade)
+ *
+ * This file maintains backward compatibility with existing usage while
+ * internally delegating to the new manager classes.
+ */
+
+import { SelectionManager } from './core/selection-manager.js';
+import { ActionManager } from './core/action-manager.js';
+import { StateManager } from './core/state-manager.js';
+import { JtagsTable } from './components/jtags-table.js';
+import { JtagsColumn } from './components/jtags-column.js';
+import { JtagsAction } from './components/jtags-action.js';
+import { JtagsCell } from './components/jtags-cell.js';
+import { JtagsActionCell } from './components/jtags-action-cell.js';
+import { JtagsRow } from './components/jtags-row.js';
+import { JtagsGrid } from './components/jtags-grid.js';
+import { JtagsToolbar } from './components/jtags-toolbar.js';
+import { JtagsPagination } from './components/jtags-pagination.js';
+import { JtagsModal } from './components/jtags-modal.js';
+
+// Default table ID - will be updated when table is found
+const DEFAULT_TABLE_ID = 'jtags-table-default';
+
+// Manager instances - lazily initialized
+let selectionManager = null;
+let actionManager = null;
+let stateManager = null;
+
+/**
+ * Initialize managers for the table.
+ * Called lazily on first interaction.
+ */
+function initManagers() {
+  if (selectionManager) return;
+
+  const tableId = document.querySelector('[data-jtags-table-id]')?.dataset.jtagsTableId || DEFAULT_TABLE_ID;
+  stateManager = new StateManager(tableId);
+  selectionManager = new SelectionManager(tableId);
+  actionManager = new ActionManager(tableId, selectionManager);
+}
+
+// ============================================================================
+// Backward Compatibility Layer
+// ============================================================================
+
+// Expose state variables as getters/setters for backward compatibility
+Object.defineProperty(window, 'selectionMode', {
+  get: () => {
+    initManagers();
+    return selectionManager.selectionMode;
+  },
+  set: (value) => {
+    initManagers();
+    selectionManager.selectionMode = value;
+  }
+});
+
+Object.defineProperty(window, 'selectedIds', {
+  get: () => {
+    initManagers();
+    return selectionManager.selectedIds;
+  },
+  set: (value) => {
+    initManagers();
+    selectionManager.selectedIds = value;
+  }
+});
+
+Object.defineProperty(window, 'pendingAction', {
+  get: () => {
+    initManagers();
+    return actionManager.pendingAction;
+  },
+  set: (value) => {
+    initManagers();
+    actionManager.pendingAction = value;
+  }
+});
+
+// ============================================================================
+// Modal Functions
+// ============================================================================
+
 function closeModal() {
   document.getElementById('jtags-modal').classList.add('jtags-hidden');
 }
 
-function handleAction(button) {
-  const needsConfirm = button.dataset.confirm === 'true';
-
-  if (needsConfirm) {
-    openActionModal(button);
-  } else {
-    executeAction(button);
-  }
-}
-
-let pendingAction = null;
 function openActionModal(button) {
+  initManagers();
+
   const message = button.dataset.confirmMessage;
   const isSelectionBased = button.classList.contains('jtags-table__action--selection');
 
   const banner = document.getElementById('selection-banner');
   const totalItems = parseInt(banner.dataset.totalItems);
 
-  pendingAction = {
+  actionManager.setPendingAction({
     url: button.dataset.url,
     method: button.dataset.method,
     isSelectionBased: isSelectionBased
-  };
+  });
 
-  if (isSelectionBased) {
-    if (selectionMode === 'filter') {
-      document.getElementById('jtags-modal-message').textContent = `${message} (${totalItems} items matching filter)`;
-    } else {
-      document.getElementById('jtags-modal-message').textContent = `${message} (${selectedIds.length} items selected)`;
-    }
-  } else {
-    document.getElementById('jtags-modal-message').textContent = message;
-  }
-
+  const confirmMessage = actionManager.getConfirmationMessage(message, isSelectionBased, totalItems);
+  document.getElementById('jtags-modal-message').textContent = confirmMessage;
   document.getElementById('jtags-modal').classList.remove('jtags-hidden');
 }
 
 function confirmAction() {
-  let params = {};
+  initManagers();
 
-  if (pendingAction.isSelectionBased) {
-    params.selectionMode = selectionMode;
-    if (selectionMode === 'ids') {
-      params.ids = selectedIds;
-    } else {
-      // Include filter params
-      params.searchField = document.getElementById('searchField').value;
-      params.search = document.getElementById('search').value;
-    }
-  }
+  const filterElements = {
+    searchField: document.getElementById('searchField'),
+    search: document.getElementById('search')
+  };
 
-  htmx.ajax(pendingAction.method, pendingAction.url, {
+  const params = actionManager.buildActionParams(
+    actionManager.pendingAction.isSelectionBased,
+    filterElements
+  );
+
+  htmx.ajax(actionManager.pendingAction.method, actionManager.pendingAction.url, {
     target: '#table-container',
     swap: 'outerHTML',
     values: params
   }).then(() => {
     closeModal();
     // Reset selection state after successful action
-    if (pendingAction.isSelectionBased) {
-      selectionMode = 'ids';
-      selectedIds = [];
+    if (actionManager.pendingAction.isSelectionBased) {
+      selectionManager.clearSelection();
     }
-    pendingAction = null;
+    actionManager.clearPendingAction();
   });
 }
 
@@ -78,54 +143,23 @@ function executeAction(button) {
   });
 }
 
-// State variables - persist across swaps
-let selectionMode = 'ids';
-let selectedIds = [];
+function handleAction(button) {
+  initManagers();
 
-// Modal handlers - these elements are outside swap zone, attach once
-document.addEventListener('DOMContentLoaded', function () {
-  document.getElementById('jtags-modal').addEventListener('click',
-      closeModal);
-  document.querySelector('#jtags-modal .jtags-modal__content').addEventListener(
-      'click',
-      function (event) {
-        event.stopPropagation();
-      });
-});
-
-// Delegated handlers - work for elements inside swap zone
-document.body.addEventListener('click', function (event) {
-
-  // Select all checkbox
-  if (event.target.matches('#select-all')) {
-    handleSelectAll(event.target);
+  if (actionManager.needsConfirmation(button)) {
+    openActionModal(button);
+  } else {
+    executeAction(button);
   }
+}
 
-  // Row checkbox
-  if (event.target.matches('input[name="select-item"]')) {
-    handleRowCheckbox(event.target);
-  }
-
-  // "Select all X matching" link in banner
-  if (event.target.matches('#select-all-matching')) {
-    handleSelectAllMatching();
-  }
-
-  // "Clear selection" link in banner
-  if (event.target.matches('#clear-selection')) {
-    handleClearSelection();
-  }
-
-  if (event.target.matches('.jtags-table__action--selection')) {
-    handleAction(event.target);
-  }
-
-  if (event.target.matches('.jtags-table__action--global')) {
-    handleAction(event.target);
-  }
-});
+// ============================================================================
+// Selection Functions
+// ============================================================================
 
 function handleSelectAll(checkbox) {
+  initManagers();
+
   const rowCheckboxes = document.querySelectorAll('input[name="select-item"]');
 
   rowCheckboxes.forEach(cb => {
@@ -133,27 +167,26 @@ function handleSelectAll(checkbox) {
   });
 
   if (checkbox.checked) {
-    selectedIds = Array.from(rowCheckboxes).map(cb => cb.value);
+    const ids = Array.from(rowCheckboxes).map(cb => cb.value);
+    selectionManager.selectAll(ids);
     showSelectionActions();
     showBannerIfMorePages();
   } else {
-    selectedIds = [];
-    selectionMode = 'ids';
+    selectionManager.clearSelection();
     hideSelectionActions();
     hideBanner();
   }
 }
 
 function handleRowCheckbox(checkbox) {
+  initManagers();
+
   const id = checkbox.value;
 
   if (checkbox.checked) {
-    if (!selectedIds.includes(id)) {
-      selectedIds.push(id);
-    }
+    selectionManager.selectId(id);
   } else {
-    selectedIds = selectedIds.filter(i => i !== id);
-    selectionMode = 'ids'; // revert to ids mode if any unchecked
+    selectionManager.deselectId(id);
   }
 
   updateSelectAllState();
@@ -161,13 +194,14 @@ function handleRowCheckbox(checkbox) {
 }
 
 function handleSelectAllMatching() {
-  selectionMode = 'filter';
+  initManagers();
+  selectionManager.setFilterMode();
   updateBannerForFilterMode();
 }
 
 function handleClearSelection() {
-  selectionMode = 'ids';
-  selectedIds = [];
+  initManagers();
+  selectionManager.clearSelection();
 
   document.querySelectorAll('input[name="select-item"]').forEach(cb => {
     cb.checked = false;
@@ -189,7 +223,7 @@ function handleClearSelection() {
 
 function updateSelectAllState() {
   const checkboxes = Array.from(
-      document.querySelectorAll('input[name="select-item"]'));
+    document.querySelectorAll('input[name="select-item"]'));
   const selectAll = document.getElementById('select-all');
 
   const allChecked = checkboxes.every(cb => cb.checked);
@@ -207,7 +241,9 @@ function updateSelectAllState() {
 }
 
 function updateUIState() {
-  if (selectedIds.length > 0) {
+  initManagers();
+
+  if (selectionManager.hasSelection()) {
     showSelectionActions();
   } else {
     hideSelectionActions();
@@ -216,32 +252,31 @@ function updateUIState() {
 
   // Only show banner if all visible are selected AND more pages exist
   const checkboxes = Array.from(
-      document.querySelectorAll('input[name="select-item"]'));
+    document.querySelectorAll('input[name="select-item"]'));
   const allChecked = checkboxes.every(cb => cb.checked);
 
-  if (allChecked && selectionMode === 'ids') {
+  if (allChecked && !selectionManager.isFilterMode()) {
     showBannerIfMorePages();
-  } else if (selectionMode !== 'filter') {
+  } else if (!selectionManager.isFilterMode()) {
     hideBanner();
   }
 }
 
 function showSelectionActions() {
   document.querySelectorAll('.jtags-table__action--selection')
-  .forEach(it => {
-    it.classList.remove('jtags-hidden');
-  })
+    .forEach(it => {
+      it.classList.remove('jtags-hidden');
+    });
 }
 
 function hideSelectionActions() {
   document.querySelectorAll('.jtags-table__action--selection')
-  .forEach(it => {
-    it.classList.add('jtags-hidden');
-  });
+    .forEach(it => {
+      it.classList.add('jtags-hidden');
+    });
 }
 
 function showBannerIfMorePages() {
-  // You'll need to pass totalItems and pageSize from the template
   const banner = document.getElementById('selection-banner');
   const totalItems = parseInt(banner.dataset.totalItems);
   const pageSize = parseInt(banner.dataset.pageSize);
@@ -261,9 +296,98 @@ function updateBannerForFilterMode() {
   banner.innerHTML = `<p>All ${totalItems} items selected. <a id="clear-selection" href="#">Clear selection</a></p>`;
 }
 
-document.body.addEventListener('htmx:afterSwap', function(event) {
-  if (event.detail.target.id === 'table-container') {
-    selectionMode = 'ids';
-    selectedIds = [];
+// ============================================================================
+// Event Listeners
+// ============================================================================
+
+// Modal handlers - these elements are outside swap zone, attach once
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('jtags-modal');
+  if (modal) {
+    modal.addEventListener('click', closeModal);
+    const modalContent = modal.querySelector('.jtags-modal__content');
+    if (modalContent) {
+      modalContent.addEventListener('click', function(event) {
+        event.stopPropagation();
+      });
+    }
   }
 });
+
+// Delegated handlers - work for elements inside swap zone
+document.body.addEventListener('click', function(event) {
+  // Select all checkbox
+  if (event.target.matches('#select-all')) {
+    handleSelectAll(event.target);
+  }
+
+  // Row checkbox
+  if (event.target.matches('input[name="select-item"]')) {
+    handleRowCheckbox(event.target);
+  }
+
+  // "Select all X matching" link in banner
+  if (event.target.matches('#select-all-matching')) {
+    handleSelectAllMatching();
+  }
+
+  // "Clear selection" link in banner
+  if (event.target.matches('#clear-selection')) {
+    handleClearSelection();
+  }
+
+  // Action buttons
+  if (event.target.matches('.jtags-table__action--selection')) {
+    handleAction(event.target);
+  }
+
+  if (event.target.matches('.jtags-table__action--global')) {
+    handleAction(event.target);
+  }
+});
+
+// Reset selection state on HTMX swap
+document.body.addEventListener('htmx:afterSwap', function(event) {
+  if (event.detail.target.id === 'table-container') {
+    initManagers();
+    selectionManager.clearSelection();
+  }
+});
+
+// ============================================================================
+// Exports for ES Module usage
+// ============================================================================
+
+export {
+  // Web Components
+  JtagsTable,
+  JtagsColumn,
+  JtagsAction,
+  JtagsCell,
+  JtagsActionCell,
+  JtagsRow,
+  JtagsGrid,
+  JtagsToolbar,
+  JtagsPagination,
+  JtagsModal,
+  // Manager classes
+  SelectionManager,
+  ActionManager,
+  StateManager,
+  // Functions
+  closeModal,
+  handleAction,
+  confirmAction,
+  executeAction,
+  handleSelectAll,
+  handleRowCheckbox,
+  handleSelectAllMatching,
+  handleClearSelection,
+  updateSelectAllState,
+  updateUIState,
+  showSelectionActions,
+  hideSelectionActions,
+  showBannerIfMorePages,
+  hideBanner,
+  updateBannerForFilterMode
+};

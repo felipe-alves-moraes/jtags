@@ -1,177 +1,78 @@
-<div id="table-container"
-     class="jtags-table"
-     hx-get="{config.baseUrl}"
-     hx-include="#table-actions"
-     hx-target="#table-container"
-     hx-swap="outerHTML"
-     hx-trigger="table-refresh from:body"
->
-    <div id="table-actions" class="jtags-table__toolbar">
-        <div class="jtags-table__toolbar-left">
-            {#if config.showCheckbox}
-                <input type="checkbox" id="select-all"/>
-            {/if}
-            {#for action in config.toolbarActions}
-                {#if action.selectionBased}
-                    <button class="jtags-table__action jtags-table__action--selection jtags-hidden"
-                            title="{action.label}"
-                            data-key="{action.key}"
-                            data-url="{action.url}"
-                            data-method="{action.method}"
-                            data-confirm="{action.confirm}"
-                            data-confirm-message="{action.confirmMessage}"
-                    >
-                        <svg class="jtags-icon">
-                            <use href="{config.iconBasePath}#jtags-icon-{action.icon}"></use>
-                        </svg>
-                        {#if action.showLabel}
-                            <span class="jtags-table__action-label">{action.label}</span>
-                        {/if}
-                    </button>
-                {/if}
-            {/for}
-        </div>
-        <div class="jtags-table__toolbar-right">
-            {#if config.showSearch}
-                <label for="searchField">Search Field</label>
-                <select id="searchField"
-                        name="searchField"
-                >
-                    <option value="">Select a Field</option>
-                    {#each config.columns}
-                        {#if config.searchableFields.contains(it.key) }
-                            <option value="{it.key}" {#if state.searchField == it.key}selected{/if}>{it.label}</option>
-                        {/if}
-                    {/each}
-                </select>
-                <label for="search">Search</label>
-                <input id="search" name="search" type="text" placeholder="Search"
-                       hx-get="{config.baseUrl}?sort={state.sortBy}&asc={state.ascending}&page=1"
-                       hx-include="#table-actions"
-                       hx-target="#table-container"
-                       hx-swap="outerHTML"
-                       hx-trigger="keyup changed delay:300ms"
-                       hx-push-url="true"
-                       value="{state.searchTerm}"
-                />
-            {/if}
-            <!-- search inputs -->
-            {#for action in config.toolbarActions}
-                {#if ! action.selectionBased}
-                    <button class="jtags-table__action jtags-table__action--global"
-                            title="{action.label}"
-                            data-key="{action.key}"
-                            data-url="{action.url}"
-                            data-method="{action.method}"
-                            data-confirm="{action.confirm}"
-                            data-confirm-message="{action.confirmMessage}"
-                    >
-                        <svg class="jtags-icon">
-                            <use href="{config.iconBasePath}#jtags-icon-{action.icon}"></use>
-                        </svg>
-                        {#if action.showLabel}
-                            <span class="jtags-table__action-label">{action.label}</span>
-                        {/if}
-                    </button>
-                {/if}
-            {/for}
-        </div>
-    </div>
-    <div id="selection-banner" class="jtags-table__banner jtags-hidden"
-         data-total-items="{state.page.totalItems}"
-         data-page-size="{state.page.pageSize}">
-        <p>All {state.page.pageSize} items on this page selected.
-            <a id="select-all-matching" href="#">Select all {state.page.totalItems}?</a>
-        </p>
-    </div>
-    <table class="jtags-table__grid">
-        <thead>
-        <tr class="jtags-table__row">
-            {#if config.showCheckbox}
-                <th class="jtags-table__header jtags-table__header--checkbox"></th>
-            {/if}
-            {#for column in config.columns}
-                <th
-                        class="jtags-table__header jtags-table__header--sortable"
-                        style="cursor: pointer"
-                        hx-get="{config.baseUrl}?sort={column.key}&asc={#if column.key == state.sortBy}{#if state.ascending}false{#else}true{/if}{#else}true{/if}&page=1"
-                        hx-include="#table-actions"
+<jtags-table id="table-container"
+             base-url="{config.baseUrl}"
+             id-field="{config.idField}"
+             icon-base-path="{config.iconBasePath}"
+             {#if config.showCheckbox}show-checkbox{/if}
+    {#if config.showSearch}show-search{/if}
+             hx-get="{config.baseUrl}"
+             hx-trigger="jtags-table-sort, jtags-table-search, jtags-table-page, jtags-table-size, jtags-table-refresh from:body"
+             hx-target="#table-container"
+             hx-swap="outerHTML"
+             hx-push-url="true"
+             hx-include="#searchField, #search, #pageSize, #sort, #asc, #page">
+
+    {! Hidden inputs for state that isn't in form controls !}
+    <input type="hidden" id="sort" name="sort" value="{state.sortBy ?: ''}">
+    <input type="hidden" id="asc" name="asc" value="{state.ascending}">
+    <input type="hidden" id="page" name="page" value="{state.page.currentPage}">
+
+    <jtags-toolbar search-field="{state.searchField ?: ''}"
+                   search-value="{state.searchTerm ?: ''}"
+                   total-items="{state.page.totalItems}"
+                   page-size="{state.page.pageSize}">
+
+        {#for action in config.toolbarActions}
+            <jtags-action key="{action.key}"
+                          label="{action.label}"
+                          icon="{action.icon}"
+                          {#if action.showLabel}show-label{/if}
+                {#if action.selectionBased}selection-based{/if}
+                    {#if action.confirm}
+                        hx-get="{action.url}/confirm"
+                        hx-target="#jtags-modal-container"
+                        hx-swap="innerHTML"
+                    {#else}
+                        hx-{action.method}="{action.url}"
                         hx-target="#table-container"
                         hx-swap="outerHTML"
-                        hx-push-url="true"
-                >
-                    {column.label}
-                    {#if column.key == state.sortBy}
-                        {#if state.ascending}
-                            <svg class="jtags-icon">
-                                <use href="{config.iconBasePath}#jtags-icon-sort-asc"></use>
-                            </svg>
-                        {#else}
-                            <svg class="jtags-icon">
-                                <use href="{config.iconBasePath}#jtags-icon-sort-desc"></use>
-                            </svg>
-                        {/if}
                     {/if}
-                </th>
-            {/for}
-        </tr>
-        </thead>
-        <tbody id="table-body">
-        {#for item in state.page.items}
-            <tr class="jtags-table__row">
-                {#if config.showCheckbox}
-                    <td class="jtags-table__cell jtags-table__cell--checkbox"><input type="checkbox" name="select-item"
-                                                                                     value="{util:property(item, config.idField)}"/>
-                    </td>
-                {/if}
-
-                {#for column in config.columns}
-                    <td class="jtags-table__cell">{util:property(item, column.key)}</td>
-                {/for}
-            </tr>
-        {#else}
-        <tr>
-            <td class="jtags-table__cell"
-                colspan="{#if config.showCheckbox}{config.columns.size + 1}{#else}{config.columns.size}{/if}">
-                No data found
-            </td>
-        </tr>
-        {/for}
-        </tbody>
-    </table>
-
-    <div class="jtags-table__footer">
-        <div class="jtags-table__page-size">
-            {#if config.pageSizeOptions.size > 1}
-            <label for="pageSize">Show</label>
-            <select id="pageSize"
-                    name="size"
-                    hx-get="{config.baseUrl}?sort={state.sortBy}&asc={state.ascending}&page=1"
-                    hx-include="#table-actions, this"
-                    hx-target="#table-container"
-                    hx-swap="outerHTML"
-                    hx-trigger="change"
-                    hx-push-url="true"
+                {#if action.selectionBased}hx-include="[name=select-item]:checked, #searchField, #search"{/if}
             >
-                {#for size in config.pageSizeOptions}
-                <option value="{size}" {#if size == state.page.pageSize}selected{/if}>{size}</option>
+            </jtags-action>
+        {/for}
+
+    </jtags-toolbar>
+
+    {#for column in config.columns}
+        <jtags-column key="{column.key}"
+                      label="{column.label}"
+                      sortable
+                      {#if config.searchableFields.contains(column.key)}searchable{/if}>
+        </jtags-column>
+    {/for}
+
+    {! Grid - renders header from columns above, contains data rows !}
+    <jtags-grid sort-by="{state.sortBy ?: ''}"
+                {#if state.ascending}sort-asc{/if}
+                empty-message="No data found">
+        {#for item in state.page.items}
+            <jtags-row item-id="{util:property(item, config.idField)}">
+                {#for column in config.columns}
+                    <jtags-cell column="{column.key}">{util:property(item, column.key)}</jtags-cell>
                 {/for}
-            </select>
-            <span>entries</span>
-            {/if}
-        </div>
+            </jtags-row>
+        {/for}
+    </jtags-grid>
 
-        {#jtagsPagination state=state baseUrl=config.baseUrl showLabels=config.showPaginationLabels iconBasePath=config.iconBasePath /}
-    </div>
-</div>
+    <jtags-pagination current="{state.page.currentPage}"
+                      total="{state.page.totalPages}"
+                      size="{state.page.pageSize}"
+                      total-items="{state.page.totalItems}"
+                      sizes="{#for size in config.pageSizeOptions}{size}{#if ! size_isLast},{/if}{/for}"
+                      {#if config.showPaginationLabels}show-labels{/if}>
+    </jtags-pagination>
 
-<div id="jtags-modal" class="jtags-modal jtags-hidden">
-    <div class="jtags-modal__content">
-        <p id="jtags-modal-message"></p>
-        <button id="jtags-modal-confirm-btn"
-                onclick="confirmAction()">
-            Confirm
-        </button>
-        <button onclick="closeModal()">Cancel</button>
-    </div>
-</div>
+</jtags-table>
+
+{! Modal container for action confirmations - outside table swap zone !}
+<div id="jtags-modal-container"></div>

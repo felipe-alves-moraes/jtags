@@ -1,0 +1,15 @@
+{#if count > 0}
+<jtags-modal open message="Delete {count} selected user(s){#if hasFilter} (filtered by {searchField}: '{search}'){/if}?">
+{#else if hasFilter}
+<jtags-modal open message="Delete all users matching {searchField}: '{search}'?">
+{#else}
+<jtags-modal open message="No users selected.">
+{/if}
+    <button slot="confirm"
+            hx-delete="/fragments/users/table"
+            hx-include="[name=select-item]:checked, #searchField, #search"
+            hx-target="#table-container"
+            hx-swap="outerHTML">
+        Delete
+    </button>
+</jtags-modal>

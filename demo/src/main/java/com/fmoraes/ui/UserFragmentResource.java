@@ -29,6 +29,10 @@ public class UserFragmentResource {
     Template userTable;
 
     @Inject
+    @Location("fragments/delete-confirm.html")
+    Template deleteConfirm;
+
+    @Inject
     UserService userService;
 
     private final List<TableColumn> columns = List.of(
@@ -85,6 +89,25 @@ public class UserFragmentResource {
             .data("config", config);
     }
 
+    @GET
+    @Path("/table/confirm")
+    @Produces(MediaType.TEXT_HTML)
+    public TemplateInstance deleteConfirmation(
+        @QueryParam("select-item") List<String> selectedIds,
+        @QueryParam("searchField") String searchField,
+        @QueryParam("search") String search) {
+
+        int count = selectedIds != null ? selectedIds.size() : 0;
+        boolean hasFilter = searchField != null && !searchField.isBlank()
+            && search != null && !search.isBlank();
+
+        return deleteConfirm
+            .data("count", count)
+            .data("hasFilter", hasFilter)
+            .data("searchField", searchField)
+            .data("search", search);
+    }
+
     @DELETE
     @Path("/table/{id}")
     @Produces(MediaType.TEXT_HTML)
@@ -99,17 +122,22 @@ public class UserFragmentResource {
     @Path("/table")
     @Produces(MediaType.TEXT_HTML)
     public Response bulkDelete(
-        @QueryParam("selectionMode") String type,
-        @QueryParam("ids") Set<Long> ids,
+        @QueryParam("select-item") List<Long> selectedIds,
         @QueryParam("searchField") String searchField,
         @QueryParam("search") String search) {
 
-        if (type.equals("ids")) {
-            userService.bulkDelete(ids);
-        } else {
+        boolean hasSelectedIds = selectedIds != null && !selectedIds.isEmpty();
+        boolean hasFilter = searchField != null && !searchField.isBlank()
+            && search != null && !search.isBlank();
+
+        if (hasSelectedIds) {
+            userService.bulkDelete(Set.copyOf(selectedIds));
+        } else if (hasFilter) {
             userService.bulkDelete(searchField, search);
         }
 
-        return Response.noContent().header("HX-Trigger", "table-refresh").build();
+        return Response.noContent()
+            .header("HX-Trigger", "jtags-table-refresh")
+            .build();
     }
 }
