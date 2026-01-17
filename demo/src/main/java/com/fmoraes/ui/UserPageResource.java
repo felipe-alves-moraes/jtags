@@ -1,5 +1,7 @@
 package com.fmoraes.ui;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fmoraes.jtags.table.TableColumn;
 import com.fmoraes.jtags.table.TableConfig;
 import com.fmoraes.jtags.table.TableState;
@@ -26,6 +28,9 @@ public class UserPageResource {
     @Inject
     UserService userService;
 
+    @Inject
+    ObjectMapper objectMapper;
+
     private final List<TableColumn> columns = List.of(
         new TableColumn("id", "ID"),
         new TableColumn("name", "Name"),
@@ -51,7 +56,7 @@ public class UserPageResource {
         @QueryParam("sort") @DefaultValue("id") String sort,
         @QueryParam("asc") @DefaultValue("true") boolean ascending,
         @QueryParam("page") @DefaultValue("1") int page,
-        @QueryParam("size") @DefaultValue("5") int size) {
+        @QueryParam("size") @DefaultValue("5") int size) throws JsonProcessingException {
 
         var pagedItems = userService.findAll(searchField, search, sort, ascending, page, size);
 
@@ -78,6 +83,8 @@ public class UserPageResource {
 
         return users
             .data("state", state)
-            .data("config", config);
+            .data("config", config)
+            .data("items", objectMapper.writeValueAsString(state.page().items()))
+            ;
     }
 }

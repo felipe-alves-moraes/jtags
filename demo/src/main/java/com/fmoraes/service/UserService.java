@@ -25,7 +25,16 @@ public class UserService {
         new User(9L, "Ivy Chen", "ivy@example.com", "Moderator"),
         new User(10L, "Jack Taylor", "jack@example.com", "User"),
         new User(11L, "Karen Adams", "karen@example.com", "User"),
-        new User(12L, "Leo Martinez", "leo@example.com", "User")
+        new User(12L, "Leo Martinez", "leo@example.com", "User"),
+        new User(13L, "Leo Martinez", "leo@example.com", "User"),
+        new User(14L, "Leo Martinez", "leo@example.com", "User"),
+        new User(15L, "Leo Martinez", "leo@example.com", "User"),
+        new User(16L, "Leo Martinez", "leo@example.com", "User"),
+        new User(17L, "Leo Martinez", "leo@example.com", "User"),
+        new User(18L, "Leo Martinez", "leo@example.com", "User"),
+        new User(19L, "Leo Martinez", "leo@example.com", "User"),
+        new User(20L, "Leo Martinez", "leo@example.com", "User"),
+        new User(21L, "Leo Martinez", "leo@example.com", "User")
     );
 
     public Page<User> findAll(String searchField, String search, String sortBy, boolean ascending, int page, int pageSize) {
