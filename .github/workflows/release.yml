@@ -1,0 +1,135 @@
+name: Release
+
+on:
+  # Manual trigger with version input
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 0.2.0)'
+        required: true
+        type: string
+      skip-tests:
+        description: 'Skip tests (use with caution)'
+        required: false
+        type: boolean
+        default: false
+
+  # Or trigger by pushing a tag
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # For creating releases and pushing commits
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for changelog generation
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            # Extract version from tag (remove 'v' prefix)
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # Calculate next snapshot version
+          IFS='.' read -ra PARTS <<< "$VERSION"
+          NEXT_PATCH=$((PARTS[2] + 1))
+          NEXT_VERSION="${PARTS[0]}.${PARTS[1]}.$NEXT_PATCH-SNAPSHOT"
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+          echo "Release version: $VERSION"
+          echo "Next development version: $NEXT_VERSION"
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: jtags/package-lock.json
+
+      # Run tests unless skipped
+      - name: Install JS dependencies
+        if: ${{ !inputs.skip-tests }}
+        working-directory: jtags
+        run: npm ci
+
+      - name: Install Playwright browsers (JS)
+        if: ${{ !inputs.skip-tests }}
+        working-directory: jtags
+        run: npx playwright install --with-deps chromium
+
+      - name: Run JS tests
+        if: ${{ !inputs.skip-tests }}
+        working-directory: jtags
+        run: npm test
+
+      - name: Install Playwright browsers (Java E2E)
+        if: ${{ !inputs.skip-tests }}
+        run: mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps chromium" -f demo/pom.xml
+
+      - name: Run Java tests
+        if: ${{ !inputs.skip-tests }}
+        run: ./mvnw test
+
+      # Set release version
+      - name: Set release version
+        run: |
+          ./mvnw versions:set -DnewVersion=${{ steps.version.outputs.version }} -DgenerateBackupPoms=false
+
+      # Build release artifacts
+      - name: Build
+        run: ./mvnw clean install -DskipTests
+
+      # Commit and tag (only for workflow_dispatch, tag push already has the tag)
+      - name: Commit release version
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git add pom.xml */pom.xml
+          git commit -m "chore: release v${{ steps.version.outputs.version }}"
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin main
+          git push origin "v${{ steps.version.outputs.version }}"
+
+      # Run JReleaser to create GitHub release
+      - name: Create GitHub Release
+        env:
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./mvnw -N jreleaser:full-release
+
+      # Prepare next development iteration (only for workflow_dispatch)
+      - name: Prepare next development version
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          ./mvnw versions:set -DnewVersion=${{ steps.version.outputs.next_version }} -DgenerateBackupPoms=false
+          git add pom.xml */pom.xml
+          git commit -m "chore: prepare for next development iteration"
+          git push origin main
+
+      - name: Release summary
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Next development**: ${{ steps.version.outputs.next_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release URL**: https://github.com/${{ github.repository }}/releases/tag/v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
