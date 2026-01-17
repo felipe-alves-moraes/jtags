@@ -84,9 +84,13 @@ jobs:
         working-directory: jtags
         run: npm test
 
+      - name: Build and install modules
+        if: ${{ !inputs.skip-tests }}
+        run: ./mvnw install -DskipTests
+
       - name: Install Playwright browsers (Java E2E)
         if: ${{ !inputs.skip-tests }}
-        run: mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps chromium" -f demo/pom.xml
+        run: ./mvnw exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install --with-deps chromium" -Dexec.classpathScope=test -f demo/pom.xml
 
       - name: Run Java tests
         if: ${{ !inputs.skip-tests }}

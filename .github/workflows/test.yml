@@ -35,8 +35,10 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
+      - name: Build and install modules
+        run: ./mvnw install -DskipTests
       - name: Install Playwright browsers
-        run: mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps chromium" -f demo/pom.xml
+        run: ./mvnw exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install --with-deps chromium" -Dexec.classpathScope=test -f demo/pom.xml
       - name: Run Java unit tests and E2E tests
         run: ./mvnw test
       - uses: actions/upload-artifact@v4
