@@ -35,6 +35,10 @@ Modern web development often pushes complexity to the frontend with heavy JavaSc
 - Bookmarkable URLs
 - Icon system with SVG sprites
 
+## Documentation
+
+- [Events Reference](docs/EVENTS.md) - Custom events emitted by components
+
 ## Installation
 
 ### Requirements

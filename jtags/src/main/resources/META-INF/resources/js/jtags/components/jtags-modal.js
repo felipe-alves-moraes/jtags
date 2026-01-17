@@ -2,25 +2,22 @@
  * JtagsModal Web Component
  *
  * A modal dialog component for confirmations and alerts.
- * Server renders the modal with HTMX attributes for actions.
+ * Library-agnostic - HTTP behavior attributes should be set in templates.
  *
- * @example
+ * Events emitted:
+ * - jtags-modal-confirm: When confirm button is clicked (for non-HTTP confirms)
+ * - jtags-modal-cancel: When cancel/escape/backdrop is clicked
+ *
+ * @example With slotted buttons (template adds HTTP attributes)
  * <jtags-modal open>
  *     <p slot="message">Delete 5 selected users?</p>
- *     <button slot="confirm"
- *             hx-delete="/api/users/delete"
- *             hx-vals='{"ids": [1,2,3,4,5]}'
- *             hx-target="#table-container"
- *             hx-swap="outerHTML">
- *         Confirm
- *     </button>
+ *     <button slot="confirm">Confirm</button>
  *     <button slot="cancel">Cancel</button>
  * </jtags-modal>
  *
  * @example Simple usage with default buttons
  * <jtags-modal open message="Are you sure?"
- *              confirm-text="Yes" cancel-text="No"
- *              confirm-url="/api/delete" confirm-method="DELETE">
+ *              confirm-text="Yes" cancel-text="No">
  * </jtags-modal>
  */
 
@@ -115,23 +112,11 @@ export class JtagsModal extends HTMLElement {
     if (slottedConfirm) {
       buttonContainer.appendChild(slottedConfirm);
       this._confirmBtn = slottedConfirm;
-      // Add close behavior after HTMX request completes
-      if (!slottedConfirm.hasAttribute('hx-on::after-request')) {
-        slottedConfirm.setAttribute('hx-on::after-request', "this.closest('jtags-modal').close()");
-      }
     } else {
       this._confirmBtn = document.createElement('button');
       this._confirmBtn.type = 'button';
       this._confirmBtn.classList.add('jtags-modal__confirm');
       this._confirmBtn.textContent = this.confirmText || 'Confirm';
-
-      // Add HTMX attributes if provided
-      if (this.hasAttribute('confirm-url')) {
-        const method = this.getAttribute('confirm-method') || 'POST';
-        this._confirmBtn.setAttribute(`hx-${method.toLowerCase()}`, this.getAttribute('confirm-url'));
-        this._confirmBtn.setAttribute('hx-on::after-request', "this.closest('jtags-modal').close()");
-      }
-
       buttonContainer.appendChild(this._confirmBtn);
     }
 
@@ -166,13 +151,8 @@ export class JtagsModal extends HTMLElement {
     this._handleEscapeKey = this._handleEscapeKey.bind(this);
     document.addEventListener('keydown', this._handleEscapeKey);
 
-    // Confirm button (only if not using HTMX)
-    if (this._confirmBtn && !this._confirmBtn.hasAttribute('hx-get') &&
-        !this._confirmBtn.hasAttribute('hx-post') &&
-        !this._confirmBtn.hasAttribute('hx-delete') &&
-        !this._confirmBtn.hasAttribute('hx-put')) {
-      this._confirmBtn.addEventListener('click', this._handleConfirm);
-    }
+    // Confirm button emits event (HTTP behavior handled externally)
+    this._confirmBtn?.addEventListener('click', this._handleConfirm);
   }
 
   /**
@@ -196,12 +176,20 @@ export class JtagsModal extends HTMLElement {
   };
 
   /**
-   * Handle confirm button click (non-HTMX).
+   * Handle confirm button click.
+   * Emits a cancelable event - if not prevented, closes the modal.
+   * External code can call event.preventDefault() to handle closing manually.
    * @private
    */
   _handleConfirm = () => {
-    this.dispatchEvent(new CustomEvent('jtags-modal-confirm', { bubbles: true }));
-    this.close();
+    const event = new CustomEvent('jtags-modal-confirm', {
+      bubbles: true,
+      cancelable: true
+    });
+    const notPrevented = this.dispatchEvent(event);
+    if (notPrevented) {
+      this.close();
+    }
   };
 
   /**

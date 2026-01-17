@@ -212,33 +212,52 @@ describe('JtagsModal', () => {
     });
   });
 
-  describe('HTMX integration', () => {
-    it('should add hx-on::after-request to slotted confirm button', () => {
+  describe('library-agnostic behavior', () => {
+    it('should NOT add library-specific attributes to slotted confirm button', () => {
       const modal = createModal(`
         <jtags-modal>
           <button slot="confirm" hx-delete="/api/delete">Delete</button>
         </jtags-modal>
       `);
-      expect(modal.confirmButton.getAttribute('hx-on::after-request')).to.include('close()');
+      // Component should not modify the button's HTMX attributes
+      expect(modal.confirmButton.getAttribute('hx-delete')).to.equal('/api/delete');
+      // Component should NOT add hx-on::after-request (that's handled by integration layer)
+      expect(modal.confirmButton.hasAttribute('hx-on::after-request')).to.be.false;
     });
 
-    it('should NOT override existing hx-on::after-request', () => {
+    it('should preserve existing attributes on slotted confirm button', () => {
       const modal = createModal(`
         <jtags-modal>
-          <button slot="confirm" hx-delete="/api/delete" hx-on::after-request="customHandler()">Delete</button>
+          <button slot="confirm" data-action="delete" class="custom-btn">Delete</button>
         </jtags-modal>
       `);
-      expect(modal.confirmButton.getAttribute('hx-on::after-request')).to.equal('customHandler()');
+      expect(modal.confirmButton.getAttribute('data-action')).to.equal('delete');
+      expect(modal.confirmButton.classList.contains('custom-btn')).to.be.true;
     });
 
-    it('should add HTMX attributes from confirm-url attribute', () => {
-      const modal = createModal('<jtags-modal confirm-url="/api/delete" confirm-method="DELETE"></jtags-modal>');
-      expect(modal.confirmButton.getAttribute('hx-delete')).to.equal('/api/delete');
+    it('should emit cancelable jtags-modal-confirm event', () => {
+      const modal = createModal('<jtags-modal open></jtags-modal>');
+      let eventReceived = false;
+      let eventCancelable = false;
+
+      modal.addEventListener('jtags-modal-confirm', (e) => {
+        eventReceived = true;
+        eventCancelable = e.cancelable;
+        e.preventDefault(); // Prevent auto-close
+      });
+
+      modal.confirmButton.click();
+      expect(eventReceived).to.be.true;
+      expect(eventCancelable).to.be.true;
+      // Modal should stay open because we prevented default
+      expect(modal.open).to.be.true;
     });
 
-    it('should default to POST method for confirm-url', () => {
-      const modal = createModal('<jtags-modal confirm-url="/api/action"></jtags-modal>');
-      expect(modal.confirmButton.getAttribute('hx-post')).to.equal('/api/action');
+    it('should close modal when confirm event is not prevented', () => {
+      const modal = createModal('<jtags-modal open></jtags-modal>');
+
+      modal.confirmButton.click();
+      expect(modal.open).to.be.false;
     });
   });
 

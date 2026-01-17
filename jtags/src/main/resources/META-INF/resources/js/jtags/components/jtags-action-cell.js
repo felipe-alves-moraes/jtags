@@ -3,18 +3,18 @@
  *
  * A specialized cell component for row-level actions.
  * Renders an icon button with optional label.
- * HTTP behavior is handled by HTMX attributes (hx-get, hx-delete, etc.)
+ * All non-component attributes are passed through to the inner button,
+ * making this component library-agnostic (works with HTMX, Alpine.js, vanilla JS, etc.)
  *
  * @example
+ * // With HTMX
  * <jtags-action-cell action="edit" icon="edit" label="Edit"
- *                    hx-get="/users/1/edit"
- *                    hx-target="#modal">
+ *                    hx-get="/users/1/edit" hx-target="#modal">
  * </jtags-action-cell>
  *
+ * // With vanilla JS data attributes
  * <jtags-action-cell action="delete" icon="trash"
- *                    hx-delete="/users/1"
- *                    hx-confirm="Delete this user?"
- *                    hx-swap="delete">
+ *                    data-url="/users/1" data-method="DELETE">
  * </jtags-action-cell>
  */
 
@@ -85,29 +85,36 @@ export class JtagsActionCell extends HTMLElement {
     }
     button.setAttribute('data-action', this.action);
 
-    // Copy all hx-* attributes to the button (HTMX passthrough)
-    this._copyHtmxAttributes(button);
+    // Pass through all non-component attributes to the button
+    this._copyPassthroughAttributes(button);
 
     // Clear and append
     this.innerHTML = '';
     this.appendChild(button);
     this._rendered = true;
 
-    // Process HTMX on the new button if htmx is available
-    if (typeof htmx !== 'undefined') {
-      htmx.process(button);
-    }
+    // Dispatch event for external libraries to process the new element
+    this.dispatchEvent(new CustomEvent('jtags-render', {
+      bubbles: true,
+      detail: { element: button }
+    }));
   }
 
   /**
-   * Copy hx-* attributes from the cell to the button.
+   * Copy all non-component attributes to the target element.
+   * This enables passthrough for any library (HTMX, Alpine.js, vanilla JS, etc.)
    * @private
-   * @param {HTMLElement} button
+   * @param {HTMLElement} target
    */
-  _copyHtmxAttributes(button) {
+  _copyPassthroughAttributes(target) {
+    const componentAttributes = new Set([
+      'action', 'icon', 'label', 'icon-base-path',
+      'class', 'style', 'id'
+    ]);
+
     for (const attr of this.attributes) {
-      if (attr.name.startsWith('hx-')) {
-        button.setAttribute(attr.name, attr.value);
+      if (!componentAttributes.has(attr.name)) {
+        target.setAttribute(attr.name, attr.value);
       }
     }
   }

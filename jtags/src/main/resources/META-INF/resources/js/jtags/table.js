@@ -355,6 +355,41 @@ document.body.addEventListener('htmx:afterSwap', function(event) {
 });
 
 // ============================================================================
+// HTMX Integration Layer
+// ============================================================================
+
+// Process HTMX on dynamically rendered elements (from jtags-action-cell, etc.)
+document.body.addEventListener('jtags-render', function(event) {
+  if (typeof htmx !== 'undefined' && event.detail?.element) {
+    htmx.process(event.detail.element);
+  }
+});
+
+// Handle modal confirm with HTMX - prevent auto-close, let HTMX close after request
+document.body.addEventListener('jtags-modal-confirm', function(event) {
+  const modal = event.target.closest('jtags-modal');
+  const confirmBtn = modal?.confirmButton || event.target;
+
+  // Check if confirm button has HTMX attributes
+  const hasHtmxAction = confirmBtn.hasAttribute('hx-get') ||
+                        confirmBtn.hasAttribute('hx-post') ||
+                        confirmBtn.hasAttribute('hx-delete') ||
+                        confirmBtn.hasAttribute('hx-put') ||
+                        confirmBtn.hasAttribute('hx-patch');
+
+  if (hasHtmxAction) {
+    // Prevent default close - HTMX will handle the request
+    event.preventDefault();
+
+    // Add one-time listener to close modal after HTMX request completes
+    confirmBtn.addEventListener('htmx:afterRequest', function closeAfterRequest() {
+      confirmBtn.removeEventListener('htmx:afterRequest', closeAfterRequest);
+      modal?.close();
+    }, { once: true });
+  }
+});
+
+// ============================================================================
 // Exports for ES Module usage
 // ============================================================================
 
