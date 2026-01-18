@@ -37,11 +37,20 @@
   cursor: pointer;
 }
 
+/* Ensure jtags-action custom element inherits styles properly */
+jtags-action.jtags-table__action {
+  font: inherit;
+}
+
 .jtags-table__banner {
   width: 100%;
 }
 
 .jtags-table__grid {
+  width: 100%;
+}
+
+.jtags-table__inner {
   width: 100%;
   border-collapse: collapse;
 }
@@ -51,10 +60,27 @@
   user-select: none;
 }
 
+.jtags-table__empty-wrapper {
+  border-collapse: collapse;
+}
+
+.jtags-table__cell--empty {
+  text-align: center;
+  padding: 1rem;
+}
+
 .jtags-table__header--checkbox,
 .jtags-table__cell--checkbox {
   width: 2.5rem;
   text-align: center;
+}
+
+.jtags-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .jtags-pagination__list {
@@ -71,11 +97,33 @@
   align-items: center;
   gap: 0.25rem;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .jtags-pagination__link--disabled {
   pointer-events: none;
   opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.jtags-pagination__info {
+  font-size: 0.875rem;
+}
+
+.jtags-pagination__pages {
+  font-size: 0.875rem;
+  padding: 0 0.5rem;
+}
+
+.jtags-pagination__size {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.jtags-pagination__size select {
+  padding: 0.25rem;
 }
 
 .jtags-modal {
@@ -94,6 +142,12 @@
   position: relative;
 }
 
+.jtags-modal__buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 .jtags-table__footer {
   display: flex;
   justify-content: space-between;
@@ -106,4 +160,17 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* Screen reader only (for accessibility labels) */
+.jtags-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

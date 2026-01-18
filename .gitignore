@@ -32,6 +32,9 @@ out/
 build/
 dist/
 
+# Node.js
+node_modules/
+
 # Environment
 .env
 *.env.local

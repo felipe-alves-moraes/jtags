@@ -136,6 +136,23 @@
   color: var(--jtags-bg);
 }
 
+.jtags-pagination__info,
+.jtags-pagination__pages {
+  color: var(--jtags-text-muted);
+}
+
+.jtags-pagination__size label,
+.jtags-pagination__size span {
+  color: var(--jtags-text-muted);
+}
+
+.jtags-pagination__size select {
+  padding: var(--jtags-spacing-xs) var(--jtags-spacing-sm);
+  border: 1px solid var(--jtags-border);
+  border-radius: var(--jtags-radius);
+  font-size: var(--jtags-font-size);
+}
+
 .jtags-modal {
   background: var(--jtags-bg-modal);
 }

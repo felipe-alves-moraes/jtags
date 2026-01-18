@@ -35,6 +35,10 @@ Modern web development often pushes complexity to the frontend with heavy JavaSc
 - Bookmarkable URLs
 - Icon system with SVG sprites
 
+## Documentation
+
+- [Events Reference](docs/EVENTS.md) - Custom events emitted by components
+
 ## Installation
 
 ### Requirements
@@ -1029,6 +1033,19 @@ mvn clean install
 # Run demo
 cd demo
 mvn quarkus:dev
+```
+
+### Running Tests
+```bash
+# Java tests (Maven)
+mvn test
+
+# JavaScript tests (Web Test Runner + Playwright)
+cd jtags
+npm install     # first time only
+npm test        # run tests
+npm run test:watch     # watch mode
+npm run test:coverage  # with coverage report
 ```
 
 ### Code Style
