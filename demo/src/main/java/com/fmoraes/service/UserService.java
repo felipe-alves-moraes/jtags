@@ -91,4 +91,9 @@ public class UserService {
 
         users = List.copyOf(copyUsers);
     }
+
+    public int countAll(String searchField, String search) {
+        var filter = getFilter(searchField, search);
+        return (int) users.stream().filter(filter).count();
+    }
 }

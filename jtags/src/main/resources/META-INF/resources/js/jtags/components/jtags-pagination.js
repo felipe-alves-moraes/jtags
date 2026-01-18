@@ -14,7 +14,7 @@
 
 export class JtagsPagination extends HTMLElement {
   static get observedAttributes() {
-    return ['current', 'total', 'size', 'total-items', 'sizes', 'show-labels'];
+    return ['current', 'total', 'size', 'total-items', 'sizes'];
   }
 
   constructor() {

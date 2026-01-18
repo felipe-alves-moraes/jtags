@@ -1,5 +1,4 @@
 <jtags-table id="table-container"
-             base-url="{config.baseUrl}"
              id-field="{config.idField}"
              icon-base-path="{config.iconBasePath}"
              {#if config.showCheckbox}show-checkbox{/if}
@@ -15,6 +14,7 @@
     <input type="hidden" id="sort" name="sort" value="{state.sortBy ?: ''}">
     <input type="hidden" id="asc" name="asc" value="{state.ascending}">
     <input type="hidden" id="page" name="page" value="{state.page.currentPage}">
+    <input type="hidden" id="selectionMode" name="selectionMode" value="ids">
 
     <jtags-toolbar search-field="{state.searchField ?: ''}"
                    search-value="{state.searchTerm ?: ''}"
@@ -36,7 +36,7 @@
                         hx-target="#table-container"
                         hx-swap="outerHTML"
                     {/if}
-                {#if action.selectionBased}hx-include="[name=select-item]:checked, #searchField, #search"{/if}
+                {#if action.selectionBased}hx-include="[name=select-item]:checked, #searchField, #search, #selectionMode"{/if}
             >
             </jtags-action>
         {/for}

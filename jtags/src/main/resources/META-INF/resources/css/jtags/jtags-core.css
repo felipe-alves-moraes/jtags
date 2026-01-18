@@ -48,12 +48,25 @@ jtags-action.jtags-table__action {
 
 .jtags-table__grid {
   width: 100%;
+}
+
+.jtags-table__inner {
+  width: 100%;
   border-collapse: collapse;
 }
 
 .jtags-table__header--sortable {
   cursor: pointer;
   user-select: none;
+}
+
+.jtags-table__empty-wrapper {
+  border-collapse: collapse;
+}
+
+.jtags-table__cell--empty {
+  text-align: center;
+  padding: 1rem;
 }
 
 .jtags-table__header--checkbox,

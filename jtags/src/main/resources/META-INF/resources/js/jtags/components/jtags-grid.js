@@ -5,6 +5,9 @@
  * Generates header row from sibling <jtags-column> elements.
  * Contains <jtags-row> children as the table body.
  *
+ * Uses a real HTML <table> internally for proper semantic structure
+ * and native colspan support.
+ *
  * @example
  * <jtags-table>
  *     <jtags-column key="name" label="Name" sortable></jtags-column>
@@ -19,11 +22,12 @@
 
 export class JtagsGrid extends HTMLElement {
   static get observedAttributes() {
-    return ['sort-by', 'sort-asc', 'empty-message'];
+    return ['sort-by', 'sort-asc'];
   }
 
   constructor() {
     super();
+    this._table = null;
     this._thead = null;
     this._tbody = null;
     this._initialized = false;
@@ -34,8 +38,6 @@ export class JtagsGrid extends HTMLElement {
     if (this._initialized) return;
     this._initialized = true;
 
-    // Apply table display
-    this.style.display = 'table';
     this.classList.add('jtags-table__grid');
 
     // Build table structure
@@ -51,27 +53,28 @@ export class JtagsGrid extends HTMLElement {
   }
 
   /**
-   * Build the table structure with thead and tbody.
+   * Build the table structure with a real <table>, <thead> and <tbody>.
    * @private
    */
   _buildStructure() {
     // Get columns from parent table's sibling elements
     const columns = this._getColumns();
 
+    // Create the actual table element
+    this._table = document.createElement('table');
+    this._table.classList.add('jtags-table__inner');
+
     // Create thead
     this._thead = this._createThead(columns);
 
-    // Create tbody wrapper for existing row children
-    this._tbody = document.createElement('div');
-    this._tbody.style.display = 'table-row-group';
+    // Create tbody
+    this._tbody = document.createElement('tbody');
     this._tbody.classList.add('jtags-table__body');
 
     // Move existing children (jtags-row elements) to tbody
     const children = Array.from(this.children);
     children.forEach(child => {
-      if (child !== this._thead) {
-        this._tbody.appendChild(child);
-      }
+      this._tbody.appendChild(child);
     });
 
     // Check for empty state
@@ -79,9 +82,10 @@ export class JtagsGrid extends HTMLElement {
       this._showEmptyMessage(columns.length);
     }
 
-    // Insert thead at the beginning, then tbody
-    this.insertBefore(this._thead, this.firstChild);
-    this.appendChild(this._tbody);
+    // Assemble table
+    this._table.appendChild(this._thead);
+    this._table.appendChild(this._tbody);
+    this.appendChild(this._table);
   }
 
   /**
@@ -120,15 +124,13 @@ export class JtagsGrid extends HTMLElement {
    * Create the thead element with header cells.
    * @private
    * @param {Array} columns
-   * @returns {HTMLElement}
+   * @returns {HTMLTableSectionElement}
    */
   _createThead(columns) {
-    const thead = document.createElement('div');
-    thead.style.display = 'table-header-group';
+    const thead = document.createElement('thead');
     thead.classList.add('jtags-table__header-group');
 
-    const headerRow = document.createElement('div');
-    headerRow.style.display = 'table-row';
+    const headerRow = document.createElement('tr');
     headerRow.classList.add('jtags-table__row', 'jtags-table__row--header');
 
     // Add select-all checkbox header if needed
@@ -150,11 +152,10 @@ export class JtagsGrid extends HTMLElement {
   /**
    * Create the select-all checkbox header cell.
    * @private
-   * @returns {HTMLElement}
+   * @returns {HTMLTableCellElement}
    */
   _createCheckboxHeader() {
-    const cell = document.createElement('div');
-    cell.style.display = 'table-cell';
+    const cell = document.createElement('th');
     cell.classList.add('jtags-table__header', 'jtags-table__header--checkbox');
 
     const checkbox = document.createElement('input');
@@ -170,17 +171,15 @@ export class JtagsGrid extends HTMLElement {
    * Create a header cell for a column.
    * @private
    * @param {Object} column
-   * @returns {HTMLElement}
+   * @returns {HTMLTableCellElement}
    */
   _createHeaderCell(column) {
-    const cell = document.createElement('div');
-    cell.style.display = 'table-cell';
+    const cell = document.createElement('th');
     cell.classList.add('jtags-table__header');
     cell.dataset.column = column.key;
 
     if (column.sortable) {
       cell.classList.add('jtags-table__header--sortable');
-      cell.style.cursor = 'pointer';
       cell.addEventListener('click', () => this._handleSort(column.key));
     }
 
@@ -282,18 +281,16 @@ export class JtagsGrid extends HTMLElement {
    * @param {number} columnCount
    */
   _showEmptyMessage(columnCount) {
-    const emptyRow = document.createElement('div');
-    emptyRow.style.display = 'table-row';
+    // Calculate total columns (including checkbox if present)
+    const totalColumns = this._shouldShowCheckbox() ? columnCount + 1 : columnCount;
+
+    const emptyRow = document.createElement('tr');
     emptyRow.classList.add('jtags-table__row', 'jtags-table__row--empty');
 
-    const emptyCell = document.createElement('div');
-    emptyCell.style.display = 'table-cell';
+    const emptyCell = document.createElement('td');
+    emptyCell.setAttribute('colspan', totalColumns);
     emptyCell.classList.add('jtags-table__cell', 'jtags-table__cell--empty');
     emptyCell.textContent = this.emptyMessage;
-
-    // Span all columns (including checkbox if present)
-    const totalColumns = this._shouldShowCheckbox() ? columnCount + 1 : columnCount;
-    emptyCell.style.textAlign = 'center';
 
     emptyRow.appendChild(emptyCell);
     this._tbody.appendChild(emptyRow);
@@ -369,7 +366,7 @@ export class JtagsGrid extends HTMLElement {
 
   /**
    * Get the header element.
-   * @returns {HTMLElement|null}
+   * @returns {HTMLTableSectionElement|null}
    */
   get header() {
     return this._thead;
@@ -377,10 +374,18 @@ export class JtagsGrid extends HTMLElement {
 
   /**
    * Get the body element.
-   * @returns {HTMLElement|null}
+   * @returns {HTMLTableSectionElement|null}
    */
   get body() {
     return this._tbody;
+  }
+
+  /**
+   * Get the inner table element.
+   * @returns {HTMLTableElement|null}
+   */
+  get table() {
+    return this._table;
   }
 }
 

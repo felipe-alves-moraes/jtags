@@ -13,7 +13,7 @@
 
 export class JtagsRow extends HTMLElement {
   static get observedAttributes() {
-    return ['item-id', 'selected'];
+    return ['selected'];
   }
 
   constructor() {

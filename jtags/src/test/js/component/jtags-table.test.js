@@ -19,6 +19,10 @@ describe('JtagsTable', () => {
   });
 
   function createTable(html) {
+    // Auto-inject a column if none provided (required by validation)
+    if (!html.includes('<jtags-column')) {
+      html = html.replace('</jtags-table>', '<jtags-column key="id" label="ID"></jtags-column></jtags-table>');
+    }
     container.innerHTML = html;
     return container.querySelector('jtags-table');
   }
@@ -44,13 +48,14 @@ describe('JtagsTable', () => {
         expect(e.detail.tableId).to.exist;
         done();
       }, { once: true });
-      container.innerHTML = '<jtags-table></jtags-table>';
+      container.innerHTML = '<jtags-table><jtags-column key="id" label="ID"></jtags-column></jtags-table>';
     });
   });
 
   describe('selection', () => {
     const tableHtml = `
       <jtags-table id="test-table">
+        <jtags-column key="id" label="ID"></jtags-column>
         <input type="checkbox" id="select-all" />
         <input type="checkbox" name="select-item" value="1" />
         <input type="checkbox" name="select-item" value="2" />
@@ -478,9 +483,18 @@ describe('JtagsTable', () => {
       `;
     });
 
-    it('should return empty arrays when no child config elements', () => {
-      const table = createTable('<jtags-table></jtags-table>');
-      expect(table.columns).to.deep.equal([]);
+    it('should throw error when no columns defined', () => {
+      // Test the validation method directly
+      const table = document.createElement('jtags-table');
+      table._columns = [];
+      expect(() => {
+        table._validateConfiguration();
+      }).to.throw('[jtags] <jtags-table> requires at least one <jtags-column> child element');
+    });
+
+    it('should return empty actions array when no actions defined', () => {
+      const table = createTable('<jtags-table><jtags-column key="id" label="ID"></jtags-column></jtags-table>');
+      expect(table.columns.length).to.equal(1);
       expect(table.actions).to.deep.equal([]);
     });
   });
@@ -685,6 +699,38 @@ describe('JtagsTable', () => {
 
       // Banner should be visible (since totalItems > pageSize)
       expect(banner.classList.contains('jtags-hidden')).to.be.false;
+    });
+
+    it('should switch to filter mode when clicking select-all-matching in toolbar banner', () => {
+      const table = createTable(`
+        <jtags-table show-checkbox>
+          <jtags-toolbar total-items="100" page-size="10"></jtags-toolbar>
+          <input type="checkbox" id="select-all" />
+          <input type="checkbox" name="select-item" value="1" />
+          <input type="checkbox" name="select-item" value="2" />
+        </jtags-table>
+      `);
+
+      const selectAll = table.querySelector('#select-all');
+
+      // First select all on page
+      selectAll.checked = true;
+      selectAll.dispatchEvent(new Event('change', { bubbles: true }));
+
+      // Banner should be visible
+      const banner = table.toolbar.banner;
+      expect(banner.classList.contains('jtags-hidden')).to.be.false;
+
+      // Find and click the select-all-matching link in the toolbar banner
+      const selectAllMatching = banner.querySelector('#select-all-matching');
+      expect(selectAllMatching).to.exist;
+      selectAllMatching.click();
+
+      // Should switch to filter mode
+      expect(table.selectionMode).to.equal('filter');
+
+      // Banner should show "all selected" message
+      expect(banner.textContent).to.include('All 100 items selected');
     });
 
     it('should work with full component hierarchy', () => {

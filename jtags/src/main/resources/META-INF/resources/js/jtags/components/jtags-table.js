@@ -19,7 +19,7 @@ import './jtags-action.js';
 
 export class JtagsTable extends HTMLElement {
   static get observedAttributes() {
-    return ['base-url', 'id-field', 'show-checkbox', 'show-search'];
+    return [];
   }
 
   constructor() {
@@ -55,6 +55,9 @@ export class JtagsTable extends HTMLElement {
     // Parse declarative configuration from child elements
     this._parseColumns();
     this._parseActions();
+
+    // Validate required configuration
+    this._validateConfiguration();
 
     // Find and cache child structural components
     this._findChildComponents();
@@ -95,10 +98,6 @@ export class JtagsTable extends HTMLElement {
     }, 100);
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue === newValue) return;
-    // Could emit config-changed event if needed
-  }
 
   // ===========================================================================
   // Declarative Configuration Parsing
@@ -148,6 +147,25 @@ export class JtagsTable extends HTMLElement {
         showLabel: el.hasAttribute('show-label')
       };
     });
+  }
+
+  /**
+   * Validate required configuration.
+   * Throws error if required elements are missing.
+   * @private
+   */
+  _validateConfiguration() {
+    if (this._columns.length === 0) {
+      throw new Error(
+        `[jtags] <jtags-table> requires at least one <jtags-column> child element.\n` +
+        `Example:\n` +
+        `  <jtags-table>\n` +
+        `    <jtags-column key="name" label="Name" sortable></jtags-column>\n` +
+        `    <jtags-column key="email" label="Email"></jtags-column>\n` +
+        `    ...\n` +
+        `  </jtags-table>`
+      );
+    }
   }
 
   /**
@@ -710,6 +728,9 @@ export class JtagsTable extends HTMLElement {
   // ===========================================================================
 
   _emitSelectionChanged() {
+    // Update hidden input for HTMX requests
+    this._updateHiddenInput('selectionMode', this.selectionManager.selectionMode);
+
     this.dispatchEvent(new CustomEvent('selection-changed', {
       bubbles: true,
       detail: {

@@ -42,6 +42,7 @@ describe('JtagsToolbar', () => {
     it('should move slotted actions to sections', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="delete" label="Delete" selection-based></jtags-action>
             <jtags-action key="export" label="Export"></jtags-action>
@@ -56,6 +57,7 @@ describe('JtagsToolbar', () => {
     it('should auto-place selection-based actions in left section', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="delete" label="Delete" selection-based></jtags-action>
           </jtags-toolbar>
@@ -71,6 +73,7 @@ describe('JtagsToolbar', () => {
     it('should auto-place global actions in right section', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="export" label="Export"></jtags-action>
           </jtags-toolbar>
@@ -86,6 +89,7 @@ describe('JtagsToolbar', () => {
     it('should place actions based on selection-based attribute', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="delete" label="Delete" selection-based></jtags-action>
             <jtags-action key="export" label="Export"></jtags-action>
@@ -104,6 +108,7 @@ describe('JtagsToolbar', () => {
     it('should preserve hidden class on selection-based actions', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="delete" label="Delete" selection-based></jtags-action>
           </jtags-toolbar>
@@ -118,6 +123,7 @@ describe('JtagsToolbar', () => {
     it('should NOT hide global actions', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="export" label="Export"></jtags-action>
           </jtags-toolbar>
@@ -132,6 +138,7 @@ describe('JtagsToolbar', () => {
     it('should preserve HTMX attributes on slotted actions', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="delete" label="Delete" selection-based
                           hx-delete="/api/delete"
@@ -151,6 +158,7 @@ describe('JtagsToolbar', () => {
     it('should render icon in slotted action', () => {
       container.innerHTML = `
         <jtags-table icon-base-path="/icons/test.svg">
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="delete" label="Delete" icon="trash" selection-based></jtags-action>
           </jtags-toolbar>
@@ -166,6 +174,7 @@ describe('JtagsToolbar', () => {
     it('should expose selectionActions property', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="delete" label="Delete" selection-based></jtags-action>
             <jtags-action key="export" label="Export"></jtags-action>
@@ -180,6 +189,7 @@ describe('JtagsToolbar', () => {
     it('should expose globalActions property', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="delete" label="Delete" selection-based></jtags-action>
             <jtags-action key="export" label="Export"></jtags-action>
@@ -194,6 +204,7 @@ describe('JtagsToolbar', () => {
     it('should handle actions with empty icon attribute', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="delete" label="Delete" icon="" selection-based></jtags-action>
           </jtags-toolbar>
@@ -370,6 +381,7 @@ describe('JtagsToolbar', () => {
     it('should show selection actions via showSelectionActions()', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="delete" label="Delete" selection-based></jtags-action>
           </jtags-toolbar>
@@ -386,6 +398,7 @@ describe('JtagsToolbar', () => {
     it('should hide selection actions via hideSelectionActions()', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-toolbar>
             <jtags-action key="delete" label="Delete" selection-based></jtags-action>
           </jtags-toolbar>

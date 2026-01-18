@@ -69,6 +69,7 @@ describe('JtagsAction', () => {
     it('should render icon when icon attribute is set', () => {
       container.innerHTML = `
         <jtags-table icon-base-path="/icons/test.svg">
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-action key="delete" label="Delete" icon="trash"></jtags-action>
         </jtags-table>
       `;
@@ -81,6 +82,7 @@ describe('JtagsAction', () => {
     it('should use correct icon href from parent table', () => {
       container.innerHTML = `
         <jtags-table icon-base-path="/icons/custom.svg">
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-action key="delete" label="Delete" icon="trash"></jtags-action>
         </jtags-table>
       `;

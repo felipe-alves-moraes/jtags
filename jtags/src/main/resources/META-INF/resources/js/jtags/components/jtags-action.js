@@ -15,13 +15,7 @@
 
 export class JtagsAction extends HTMLElement {
   static get observedAttributes() {
-    return [
-      'key',
-      'label',
-      'icon',
-      'selection-based',
-      'show-label'
-    ];
+    return ['label', 'icon', 'show-label'];
   }
 
   constructor() {

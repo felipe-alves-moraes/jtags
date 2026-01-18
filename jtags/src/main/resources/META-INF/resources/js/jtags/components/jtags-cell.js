@@ -11,7 +11,7 @@
 
 export class JtagsCell extends HTMLElement {
   static get observedAttributes() {
-    return ['column', 'width'];
+    return ['width'];
   }
 
   constructor() {

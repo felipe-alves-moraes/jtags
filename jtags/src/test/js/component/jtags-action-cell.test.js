@@ -151,48 +151,8 @@ describe('JtagsActionCell', () => {
     });
   });
 
-  describe('HTMX attribute passthrough', () => {
-    it('should copy hx-get to button', () => {
-      const cell = createActionCell(
-        '<jtags-action-cell action="edit" hx-get="/users/1/edit"></jtags-action-cell>'
-      );
-      const button = cell.querySelector('button');
-      expect(button.getAttribute('hx-get')).to.equal('/users/1/edit');
-    });
-
-    it('should copy hx-delete to button', () => {
-      const cell = createActionCell(
-        '<jtags-action-cell action="delete" hx-delete="/users/1"></jtags-action-cell>'
-      );
-      const button = cell.querySelector('button');
-      expect(button.getAttribute('hx-delete')).to.equal('/users/1');
-    });
-
-    it('should copy hx-target to button', () => {
-      const cell = createActionCell(
-        '<jtags-action-cell action="edit" hx-get="/edit" hx-target="#modal"></jtags-action-cell>'
-      );
-      const button = cell.querySelector('button');
-      expect(button.getAttribute('hx-target')).to.equal('#modal');
-    });
-
-    it('should copy hx-swap to button', () => {
-      const cell = createActionCell(
-        '<jtags-action-cell action="delete" hx-delete="/del" hx-swap="delete"></jtags-action-cell>'
-      );
-      const button = cell.querySelector('button');
-      expect(button.getAttribute('hx-swap')).to.equal('delete');
-    });
-
-    it('should copy hx-confirm to button', () => {
-      const cell = createActionCell(
-        '<jtags-action-cell action="delete" hx-delete="/del" hx-confirm="Are you sure?"></jtags-action-cell>'
-      );
-      const button = cell.querySelector('button');
-      expect(button.getAttribute('hx-confirm')).to.equal('Are you sure?');
-    });
-
-    it('should copy multiple hx-* attributes', () => {
+  describe('attribute passthrough', () => {
+    it('should copy hx-* attributes to button (HTMX)', () => {
       const cell = createActionCell(`
         <jtags-action-cell action="delete"
                            hx-delete="/users/1"
@@ -206,6 +166,67 @@ describe('JtagsActionCell', () => {
       expect(button.getAttribute('hx-target')).to.equal('closest tr');
       expect(button.getAttribute('hx-swap')).to.equal('outerHTML');
       expect(button.getAttribute('hx-confirm')).to.equal('Delete?');
+    });
+
+    it('should copy data-* attributes to button (vanilla JS)', () => {
+      const cell = createActionCell(`
+        <jtags-action-cell action="delete"
+                           data-url="/users/1"
+                           data-method="DELETE"
+                           data-confirm="true">
+        </jtags-action-cell>
+      `);
+      const button = cell.querySelector('button');
+      expect(button.getAttribute('data-url')).to.equal('/users/1');
+      expect(button.getAttribute('data-method')).to.equal('DELETE');
+      expect(button.getAttribute('data-confirm')).to.equal('true');
+    });
+
+    it('should copy x-* attributes to button (Alpine.js)', () => {
+      const cell = createActionCell(`
+        <jtags-action-cell action="edit"
+                           x-on:click="openModal(1)"
+                           x-data="{ id: 1 }">
+        </jtags-action-cell>
+      `);
+      const button = cell.querySelector('button');
+      expect(button.getAttribute('x-on:click')).to.equal('openModal(1)');
+      expect(button.getAttribute('x-data')).to.equal('{ id: 1 }');
+    });
+
+    it('should NOT copy component-specific attributes to button', () => {
+      const cell = createActionCell(`
+        <jtags-action-cell action="edit"
+                           icon="pencil"
+                           label="Edit"
+                           icon-base-path="/icons"
+                           class="custom-class"
+                           id="my-action"
+                           hx-get="/edit">
+        </jtags-action-cell>
+      `);
+      const button = cell.querySelector('button');
+      // Component attributes should NOT be on button
+      expect(button.hasAttribute('action')).to.be.false;
+      expect(button.hasAttribute('icon')).to.be.false;
+      expect(button.hasAttribute('label')).to.be.false;
+      expect(button.hasAttribute('icon-base-path')).to.be.false;
+      // Button has its own class, but NOT parent's class
+      expect(button.classList.contains('custom-class')).to.be.false;
+      expect(button.classList.contains('jtags-action-cell__button')).to.be.true;
+      // id should NOT be copied
+      expect(button.getAttribute('id')).to.be.null;
+      // hx-* SHOULD be copied
+      expect(button.getAttribute('hx-get')).to.equal('/edit');
+    });
+
+    it('should emit jtags-render event after rendering', (done) => {
+      container.addEventListener('jtags-render', (event) => {
+        expect(event.detail.element).to.be.instanceOf(HTMLButtonElement);
+        done();
+      }, { once: true });
+
+      createActionCell('<jtags-action-cell action="edit"></jtags-action-cell>');
     });
   });
 

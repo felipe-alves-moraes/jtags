@@ -378,6 +378,7 @@ describe('JtagsPagination', () => {
     it('should get icon base path from parent table', () => {
       container.innerHTML = `
         <jtags-table icon-base-path="/custom/icons.svg">
+          <jtags-column key="id" label="ID"></jtags-column>
           <jtags-pagination></jtags-pagination>
         </jtags-table>
       `;

@@ -85,6 +85,7 @@ describe('JtagsRow', () => {
     it('should add checkbox when parent table has show-checkbox', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1">
             <jtags-cell column="name">John</jtags-cell>
           </jtags-row>
@@ -99,6 +100,7 @@ describe('JtagsRow', () => {
     it('should set checkbox value to item-id', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="42">
             <jtags-cell column="name">John</jtags-cell>
           </jtags-row>
@@ -113,6 +115,7 @@ describe('JtagsRow', () => {
     it('should insert checkbox as first cell', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1">
             <jtags-cell column="name">John</jtags-cell>
           </jtags-row>
@@ -127,6 +130,7 @@ describe('JtagsRow', () => {
     it('should NOT add checkbox when parent table lacks show-checkbox', () => {
       container.innerHTML = `
         <jtags-table>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1">
             <jtags-cell column="name">John</jtags-cell>
           </jtags-row>
@@ -152,6 +156,7 @@ describe('JtagsRow', () => {
     it('should have checkbox cell with correct class', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1">
             <jtags-cell column="name">John</jtags-cell>
           </jtags-row>
@@ -166,6 +171,7 @@ describe('JtagsRow', () => {
     it('should expose getCheckbox method', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1">
             <jtags-cell column="name">John</jtags-cell>
           </jtags-row>
@@ -179,6 +185,7 @@ describe('JtagsRow', () => {
     it('should update checkbox value when item-id changes', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1">
             <jtags-cell column="name">John</jtags-cell>
           </jtags-row>
@@ -193,6 +200,7 @@ describe('JtagsRow', () => {
     it('should exclude checkbox cell from cells property', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1">
             <jtags-cell column="name">John</jtags-cell>
             <jtags-cell column="email">john@example.com</jtags-cell>
@@ -210,6 +218,7 @@ describe('JtagsRow', () => {
     it('should NOT duplicate checkbox when row is moved in DOM', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1">
             <jtags-cell column="name">John</jtags-cell>
           </jtags-row>
@@ -236,6 +245,7 @@ describe('JtagsRow', () => {
     it('should NOT duplicate cells when row is moved multiple times', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1">
             <jtags-cell column="name">John</jtags-cell>
             <jtags-cell column="email">john@example.com</jtags-cell>
@@ -268,6 +278,7 @@ describe('JtagsRow', () => {
     it('should maintain _initialized flag after move', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1">
             <jtags-cell column="name">John</jtags-cell>
           </jtags-row>
@@ -326,6 +337,7 @@ describe('JtagsRow', () => {
     it('should check checkbox when selected', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1" selected>
             <jtags-cell column="name">John</jtags-cell>
           </jtags-row>
@@ -339,6 +351,7 @@ describe('JtagsRow', () => {
     it('should uncheck checkbox when unselected', () => {
       container.innerHTML = `
         <jtags-table show-checkbox>
+          <jtags-column key="name" label="Name"></jtags-column>
           <jtags-row item-id="1" selected>
             <jtags-cell column="name">John</jtags-cell>
           </jtags-row>

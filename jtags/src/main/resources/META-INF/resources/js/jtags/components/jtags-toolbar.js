@@ -15,7 +15,7 @@
 
 export class JtagsToolbar extends HTMLElement {
   static get observedAttributes() {
-    return ['search-field', 'search-value', 'total-items', 'page-size'];
+    return ['search-field', 'search-value'];
   }
 
   constructor() {

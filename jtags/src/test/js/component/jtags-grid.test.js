@@ -28,9 +28,46 @@ describe('JtagsGrid', () => {
       expect(customElements.get('jtags-grid')).to.exist;
     });
 
-    it('should render as table', () => {
-      const grid = createGrid('<jtags-grid></jtags-grid>');
-      expect(grid.style.display).to.equal('table');
+    it('should contain a real table element', () => {
+      container.innerHTML = `
+        <jtags-table>
+          <jtags-column key="name" label="Name"></jtags-column>
+          <jtags-grid></jtags-grid>
+        </jtags-table>
+      `;
+      const grid = container.querySelector('jtags-grid');
+      const table = grid.querySelector('table');
+      expect(table).to.exist;
+      expect(table.classList.contains('jtags-table__inner')).to.be.true;
+    });
+
+    it('should have proper table structure with thead and tbody', () => {
+      container.innerHTML = `
+        <jtags-table>
+          <jtags-column key="name" label="Name"></jtags-column>
+          <jtags-grid>
+            <jtags-row item-id="1"><jtags-cell>John</jtags-cell></jtags-row>
+          </jtags-grid>
+        </jtags-table>
+      `;
+      const grid = container.querySelector('jtags-grid');
+      const thead = grid.querySelector('thead');
+      const tbody = grid.querySelector('tbody');
+      expect(thead).to.exist;
+      expect(tbody).to.exist;
+      expect(thead.querySelector('tr')).to.exist;
+    });
+
+    it('should expose table property', () => {
+      container.innerHTML = `
+        <jtags-table>
+          <jtags-column key="name" label="Name"></jtags-column>
+          <jtags-grid></jtags-grid>
+        </jtags-table>
+      `;
+      const grid = container.querySelector('jtags-grid');
+      expect(grid.table).to.exist;
+      expect(grid.table.tagName.toLowerCase()).to.equal('table');
     });
 
     it('should have jtags-table__grid class', () => {
@@ -343,6 +380,22 @@ describe('JtagsGrid', () => {
       const grid = container.querySelector('jtags-grid');
       const emptyCell = grid.querySelector('.jtags-table__cell--empty');
       expect(emptyCell).to.be.null;
+    });
+
+    it('should use colspan to span all columns', () => {
+      container.innerHTML = `
+        <jtags-table show-checkbox>
+          <jtags-column key="id" label="ID"></jtags-column>
+          <jtags-column key="name" label="Name"></jtags-column>
+          <jtags-column key="email" label="Email"></jtags-column>
+          <jtags-grid></jtags-grid>
+        </jtags-table>
+      `;
+
+      const grid = container.querySelector('jtags-grid');
+      const emptyCell = grid.querySelector('.jtags-table__cell--empty');
+      // 3 columns + 1 checkbox = 4
+      expect(emptyCell.getAttribute('colspan')).to.equal('4');
     });
   });
 
